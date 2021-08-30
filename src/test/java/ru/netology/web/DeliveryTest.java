@@ -51,5 +51,4 @@ public class DeliveryTest {
         $(byText("Забронировать")).click();
         $(byText("Успешно!")).shouldBe(Condition.visible, Duration.ofSeconds(15));
     }
-
 }
