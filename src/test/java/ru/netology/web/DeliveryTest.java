@@ -1,6 +1,9 @@
 package ru.netology.web;
 
 import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.Selenide;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Keys;
 
@@ -10,12 +13,22 @@ import java.time.format.DateTimeFormatter;
 
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DeliveryTest {
 
+    @BeforeEach
+    void setUp() {
+        open("http://localhost:9999");
+    }
+
+    @AfterEach
+    void close() {
+        Selenide.closeWebDriver();
+    }
+
     @Test
     void shouldSendCorrectFields() {
-        open("http://localhost:9999");
         $("[data-test-id=city] input").setValue("Москва");
         $("[data-test-id=date] input").doubleClick().sendKeys(Keys.BACK_SPACE);
         $("[data-test-id=date] input").setValue(LocalDate.now().plusDays(3).format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
@@ -24,11 +37,13 @@ public class DeliveryTest {
         $("[data-test-id=agreement]").click();
         $(byText("Забронировать")).click();
         $(byText("Успешно!")).shouldBe(Condition.visible, Duration.ofSeconds(15));
+        String expectedText = "Встреча успешно забронирована на " + $("[data-test-id=date] input").getValue();
+        String actualText = $(".notification__content").getText();
+        assertEquals(expectedText, actualText);
     }
 
     @Test
     void shouldSendShortName() {
-        open("http://localhost:9999");
         $("[data-test-id=city] input").setValue("Казань");
         $("[data-test-id=date] input").doubleClick().sendKeys(Keys.BACK_SPACE);
         $("[data-test-id=date] input").setValue(LocalDate.now().plusDays(3).format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
@@ -41,7 +56,6 @@ public class DeliveryTest {
 
     @Test
     void shouldSendIncorrectName() {
-        open("http://localhost:9999");
         $("[data-test-id=city] input").setValue("Мурманск");
         $("[data-test-id=date] input").doubleClick().sendKeys(Keys.BACK_SPACE);
         $("[data-test-id=date] input").setValue(LocalDate.now().plusDays(3).format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
