@@ -11,9 +11,9 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DeliveryTest {
 
@@ -31,15 +31,14 @@ public class DeliveryTest {
     void shouldSendCorrectFields() {
         $("[data-test-id=city] input").setValue("Москва");
         $("[data-test-id=date] input").doubleClick().sendKeys(Keys.BACK_SPACE);
-        $("[data-test-id=date] input").setValue(LocalDate.now().plusDays(3).format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        String date = LocalDate.now().plusDays(3).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        $("[data-test-id=date] input").setValue(date);
         $("[data-test-id=name] input").setValue("Иванов Иван-Петр");
         $("[data-test-id=phone] input").setValue("+79060000000");
         $("[data-test-id=agreement]").click();
         $(byText("Забронировать")).click();
         $(byText("Успешно!")).shouldBe(Condition.visible, Duration.ofSeconds(15));
-        String expectedText = "Встреча успешно забронирована на " + $("[data-test-id=date] input").getValue();
-        String actualText = $(".notification__content").getText();
-        assertEquals(expectedText, actualText);
+        $(".notification__content").shouldHave(text("Встреча успешно забронирована на " + date));
     }
 
     @Test
